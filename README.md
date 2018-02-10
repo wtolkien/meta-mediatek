@@ -84,7 +84,7 @@ bitbake core-image-mtk-swu
 
 When completed, the resulting image files will be in the following directory:
 ```
-yocto-rocko/build/tmp/deploy/image/mt7623-evb
+yocto-rocko/build/tmp/deploy/images/mt7623-evb
 ```
 
 ## Installation

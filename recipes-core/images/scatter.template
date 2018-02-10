@@ -39,7 +39,7 @@
   type: NORMAL_ROM
   linear_start_addr: 0x0
   physical_start_addr: 0x0
-  partition_size: 0x4000
+  partition_size: 0x8000
   region: EMMC_USER
   storage: HW_STORAGE_EMMC
   boundary_check: true

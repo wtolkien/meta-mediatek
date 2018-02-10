@@ -1,0 +1,8 @@
+--- a/drivers/Makefile	2018-01-23 15:46:57.340144246 -0800
++++ b/drivers/Makefile	2018-01-23 15:44:30.784145837 -0800
+@@ -13,4 +13,5 @@ obj-y += tpm/
+ obj-y += twserial/
+ obj-y += video/
+ obj-y += watchdog/
++obj-y += flash/
+ obj-$(CONFIG_QE) += qe/

@@ -1,0 +1,8 @@
+--- a/drivers/misc/Makefile	2018-01-23 15:46:57.344144246 -0800
++++ b/drivers/misc/Makefile	2018-01-23 15:44:30.876145836 -0800
+@@ -21,3 +21,4 @@ obj-$(CONFIG_PDSP188x) += pdsp188x.o
+ obj-$(CONFIG_STATUS_LED) += status_led.o
+ obj-$(CONFIG_TWL4030_LED) += twl4030_led.o
+ obj-$(CONFIG_FSL_IFC) += fsl_ifc.o
++obj-y += mediatek/
+\ No newline at end of file

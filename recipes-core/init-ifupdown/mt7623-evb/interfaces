@@ -1,0 +1,38 @@
+# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
+
+# The loopback interface
+auto lo
+iface lo inet loopback
+
+# MT7623's LAN interfaces are attached to eth0 via DSA using the MT7530
+# switch - bring up eth0 with no IP address:
+auto eth0
+iface eth0 inet manual
+    pre-up ifconfig $IFACE up
+    post-down ifconfig $IFACE down
+
+# eth1 typically is the WAN uplink interface
+iface eth1 inet dhcp
+
+# DSA-attached LAN interfaces: you may want to change these...
+auto lan0
+iface lan0 inet dhcp
+
+auto lan1
+iface lan1 inet manual
+    pre-up ifconfig $IFACE up
+    post-down ifconfig $IFACE down
+
+auto lan2
+iface lan2 inet static
+    address 169.254.0.1
+    netmask 255.255.255.0
+    network 169.254.0.2
+
+auto lan3
+iface lan3 inet static
+    address 10.30.0.1
+    netmask 255.255.255.0
+    network 10.30.0.0
+
+nameserver 8.8.8.8

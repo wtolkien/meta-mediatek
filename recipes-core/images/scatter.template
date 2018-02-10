@@ -1,0 +1,129 @@
+############################################################################################################
+#
+#  General Setting
+#
+############################################################################################################
+- general: MTK_PLATFORM_CFG
+  info:
+    - config_version: V1.1.2
+      platform: MT7623
+      project: yocto-mt7623
+      storage: EMMC
+      boot_channel: MSDC_0
+      block_size: 0x20000
+############################################################################################################
+#
+#  Layout Setting
+#
+############################################################################################################
+- partition_index: SYS0
+  partition_name: PRELOADER
+  file_name: __PRELOADER_FILE__
+  is_download: true
+  type: SV5_BL_BIN
+  linear_start_addr: 0x0
+  physical_start_addr: 0x0
+  partition_size: 0x40000
+  region: EMMC_BOOT_1
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: BOOTLOADERS
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS1
+  partition_name: PTBL
+  file_name: __PART_FILE__
+  is_download: true
+  type: NORMAL_ROM
+  linear_start_addr: 0x0
+  physical_start_addr: 0x0
+  partition_size: 0x4000
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: UPDATE
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS2
+  partition_name: UBOOT-ENV
+  file_name: __UBOOT_ENV_FILE__
+  is_download: true
+  type: NONE
+  linear_start_addr: __UBOOT_ENV_OFFSET__
+  physical_start_addr: __UBOOT_ENV_OFFSET__
+  partition_size: __UBOOT_ENV_SIZE__
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: INVISIBLE
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS3
+  partition_name: UBOOT
+  file_name: __UBOOT_FILE__
+  is_download: true
+  type: NORMAL_ROM
+  linear_start_addr: __UBOOT_OFFSET__
+  physical_start_addr: __UBOOT_OFFSET__
+  partition_size: __UBOOT_SIZE__
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: UPDATE
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS4
+  partition_name: ROOTFS1
+  file_name: __ROOTFS1_FILE__
+  is_download: true
+  type: NORMAL_ROM
+  linear_start_addr: __ROOTFS1_OFFSET__
+  physical_start_addr: __ROOTFS1_OFFSET__
+  partition_size: __ROOTFS_SIZE__
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: UPDATE
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS5
+  partition_name: ROOTFS2
+  file_name: NONE
+  is_download: false
+  type: NONE
+  linear_start_addr: __ROOTFS2_OFFSET__
+  physical_start_addr: __ROOTFS2_OFFSET__
+  partition_size: __ROOTFS_SIZE__
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: INVISIBLE
+  d_type: FALSE
+  reserve: 0x00
+
+- partition_index: SYS6
+  partition_name: DATA
+  file_name: NONE
+  is_download: false
+  type: NONE
+  linear_start_addr: __DATA_OFFSET__
+  physical_start_addr: __DATA_OFFSET__
+  partition_size: __DATA_SIZE__
+  region: EMMC_USER
+  storage: HW_STORAGE_EMMC
+  boundary_check: true
+  is_reserved: false
+  operation_type: INVISIBLE
+  d_type: FALSE
+  reserve: 0x00

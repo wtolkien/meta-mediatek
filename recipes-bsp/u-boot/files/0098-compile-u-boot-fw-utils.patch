@@ -1,0 +1,42 @@
+--- a/tools/env/fw_env.c	2018-02-01 09:59:57.147929770 -0800
++++ b/tools/env/fw_env.c	2018-02-01 10:41:54.267902448 -0800
+@@ -21,6 +21,8 @@
+ #include <sys/stat.h>
+ #include <unistd.h>
+
++#include <elf.h>
++
+ #ifdef MTD_OLD
+ # include <stdint.h>
+ # include <linux/mtd/mtd.h>
+
+--- a/tools/env/Makefile	2018-02-01 09:59:57.147929770 -0800
++++ b/tools/env/Makefile	2018-02-01 14:27:02.883755819 -0800
+@@ -8,7 +8,7 @@
+ # fw_printenv is supposed to run on the target system, which means it should be
+ # built with cross tools. Although it may look weird, we only replace "HOSTCC"
+ # with "CC" here for the maximum code reuse of scripts/Makefile.host.
+-HOSTCC = $(CC)
++override HOSTCC = $(CC)
+
+ # Compile for a hosted environment on the target
+ HOST_EXTRACFLAGS  = $(patsubst -I%,-idirafter%, $(UBOOTINCLUDE)) \
+@@ -21,14 +21,12 @@ HOST_EXTRACFLAGS += -DMTD_OLD
+ endif
+
+ always := fw_printenv
+-hostprogs-y := fw_printenv_unstripped
++hostprogs-y := fw_printenv
+
+-fw_printenv_unstripped-objs := fw_env.o fw_env_main.o \
++lib-y += fw_env.o \
+ 	crc32.o ctype.o linux_string.o \
+ 	env_attr.o env_flags.o
+
+-quiet_cmd_strip = STRIP   $@
+-      cmd_strip = $(STRIP) -o $@ $<
++fw_printenv-objs := fw_env_main.o $(lib-y)
++
+
+-$(obj)/fw_printenv: $(obj)/fw_printenv_unstripped FORCE
+-	$(call if_changed,strip)

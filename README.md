@@ -6,6 +6,8 @@ An OpenEmbedded BSP layer for Mediatek's MT7623 SoC
 
 Mediatek's MT7623 is a Quad-core ARM® Cortex-A7 SoC running at 1.3GHz. It contains  many peripherals such as USB3.0, PCIe, Network  processor, Crypto engine, etc.
 
+![MT7623](https://github.com/wtolkien/meta-mediatek/blob/master/MT7623.jpg)
+
 There are two variants of this chip:
 * MT7623A: has a built-in 5-port Gigabit switch (MT7530), but no graphics
 * MT7623N: has a built-in graphic engine, but no Ethernet switch
@@ -92,6 +94,9 @@ yocto-rocko/build/tmp/deploy/images/mt7623-evb
 The build process generates two different images:
 
 1.) A set of files that can be used with Mediatek's [flashtool](https://spflashtool.com/). Flashtool requires a 'scatter file' which specifies all other components to be loaded into eMMC. The Yocto build process will generate these files automatically. After installing 'flashtool', click on the 'download' tab:
+
+![Flashtool](https://github.com/wtolkien/meta-mediatek/blob/master/sp-flash-tool.jpg)
+
  * select the `MTK_AllInOne_DA.bin` Download agent that is part of the flashtool archive
  * select `scatter-mt7623-evb.txt` from the Yocto deploy directoy above as your 'Scatter-loading' file. Flashtool will pick up all other required files from the deploy directory. These are:
  ```

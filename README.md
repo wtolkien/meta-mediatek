@@ -16,10 +16,10 @@ Currently, this BSP layer uses Linux 4.9 with patches from the Lede project, a s
 
 As of 02/2018 there are at least four hardware platforms available that use the MT7623:
 
-* the original MTK evaluation board (MT7623A), which is offered by [AsiaRF](http://www.asiarf.com/product-view-404.html) as the 'GeekForce' board
-* The Banana Pi R2 (MT7623N) from [SinoVoip](http://www.banana-pi.org/r2.html), probably the most widely available board
-* A SoM (MT7623A) from [Gainstrong](https://gainstrong.en.alibaba.com)
-* A relatively new router platform from [UniElec](http://www.unielecinc.com/q/news/cn/p/product/detail.html?qd_guid=OjXwKCaRlN)
+* the original MTK evaluation board (MT7623A), which is offered by [AsiaRF](http://www.asiarf.com/product-view-404.html) as the 'GeekForce' board.
+* The Banana Pi R2 (MT7623N) from [SinoVoip](http://www.banana-pi.org/r2.html), probably the most widely available board.
+* A SoM (MT7623A) from [Gainstrong](https://gainstrong.en.alibaba.com).
+* A relatively new router platform from [UniElec](http://www.unielecinc.com/q/news/cn/p/product/detail.html?qd_guid=OjXwKCaRlN).
 
 ## Status and Limitations
 
@@ -31,7 +31,6 @@ As of 02/2018 there are at least four hardware platforms available that use the 
 * The eMMC is partitioned into two identical rootfs partitions (for redundancy, as supported by swupdate) and an additional persistent data partition. 
 
 ## Installation
----------------
 
 Setup Yocto Rocko:
 ```
@@ -41,8 +40,8 @@ git clone -b rocko git://git.yoctoproject.org/poky.git yocto-rocko
 Add other required layers including this one:
 ```
 cd yocto-rocko
-git clone -b git://git.openembedded.org/meta-openembedded
-git clone -b https://github.com/sbabic/meta-swupdate
+git clone -b rocko git://git.openembedded.org/meta-openembedded
+git clone -b rocko https://github.com/sbabic/meta-swupdate
 git clone https://github.com/wtolkien/meta-mediatek/
 ```
 
@@ -65,7 +64,6 @@ BBLAYERS ?= " \
 That's it! You can now build firmware images for the MT7623 SoC.
 
 ## Build Instructions
----------------------
 
 
 

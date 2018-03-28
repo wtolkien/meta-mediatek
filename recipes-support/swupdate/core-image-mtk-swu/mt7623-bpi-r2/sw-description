@@ -1,0 +1,26 @@
+software =
+{
+	version = "0.1.0";
+
+	mt7623-bpi-r2 = {
+		hardware-compatibility: [ "1.0" ];
+
+		files: (
+			{
+				filename = "core-image-mtk-mt7623-bpi-r2.tar.gz";
+				type = "archive";
+				compressed = true;
+				device = "/dev/update";
+				filesystem = "ext4";
+				path = "/";
+			}
+		);
+
+		scripts: (
+			{
+				filename = "update.sh";
+				type = "shellscript";
+			}
+		);
+	};
+}

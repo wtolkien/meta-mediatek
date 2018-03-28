@@ -2,6 +2,8 @@
 
 include u-boot-mtk.inc
 
+RDPENDS_${PN} = "u-boot"
+
 PROVIDES = "u-boot-fw-utils"
 
 FILES_${PN} += " \
@@ -12,11 +14,11 @@ FILES_${PN} += " \
 INSANE_SKIP_${PN} = "ldflags"
 
 SRC_URI += " \
-    file://fw_env.config \
+    file://${MACHINE}-fw_env.config \
     "
 
 do_compile () {
-    cp ${WORKDIR}/fw_env.config ${S}/tools/env
+    cp ${WORKDIR}/${MACHINE}-fw_env.config ${S}/tools/env/fw_env
     oe_runmake -C ${S} ${UBOOT_MACHINE}
     oe_runmake -C ${S} env
 }

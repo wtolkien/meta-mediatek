@@ -41,7 +41,7 @@ generate_gpt () {
 }
 
 generate_scatter_file () {
-    cp ${THISDIR}/scatter.template ${IMGDEPLOYDIR}
+    cp ${MTK_EMMC_FILEDIR}/scatter.template ${IMGDEPLOYDIR}
     sed -i "s/__PRELOADER_FILE__/preloader-${MACHINE}.bin/g" ${SCATTER_TPL}
     sed -i "s/__PART_FILE__/gpt-${MACHINE}.bin/g" ${SCATTER_TPL}
     sed -i "s/__UBOOT_ENV_FILE__/u-boot-env-${MACHINE}.bin/g" ${SCATTER_TPL}
@@ -61,7 +61,7 @@ generate_scatter_file () {
 }
 
 copy_preloader () {
-    cp ${THISDIR}/preloader-${MACHINE}.bin ${IMGDEPLOYDIR}
+    cp ${MTK_EMMC_FILEDIR}/preloader-${MACHINE}.bin ${IMGDEPLOYDIR}
 }
 
 

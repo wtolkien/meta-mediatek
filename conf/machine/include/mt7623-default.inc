@@ -10,17 +10,25 @@
 DEFAULTTUNE ?= "cortexa7t-neon-vfpv4"
 require conf/machine/include/tune-cortexa7.inc
 
-PREFERRED_PROVIDER_virtual/kernel ?= "linux-mtk"
-PREFERRED_VERSION_linux-mtk ?= "4.9%"
+PREFERRED_PROVIDER_virtual/kernel = "linux-mtk"
+PREFERRED_VERSION_linux-mtk = "4.14%"
 LINUX_VERSION_EXTENSION ?= "-mt7623"
 
 KERNEL_IMAGETYPE ?= "zImage"
 
+UBOOT_LOADADDRESS = "0x80008000"
+UBOOT_ENTRYPOINT = "0x80008000"
+
 PREFERRED_PROVIDER_virtual/bootloader = "u-boot"
 PREFERRED_PROVIDER_u-boot = "u-boot"
 PREFERRED_VERSION_u-boot = "2014.04"
+PREFERRED_VERSION_u-boot-fw-utils = "2014.04"
+
+# kernel and devicetree should be part of rootfs
+IMAGE_INSTALL_append = " kernel kernel-modules"
+
+# extra options for embedded to minimize Flash wear
+EXTRA_IMAGECMD_ext4 = "-b 1024 -j -O sparse_super,filetype,^resize_inode,dir_index,^ext_attr,^64bit,^dir_nlink,extent,extra_isize,flex_bg,^huge_file,large_file,^meta_bg,^quota -I 128 -i 4096"
 
 SOC_FAMILY = "mediatek:mt7623"
 require conf/machine/include/soc-family.inc
-
-SERIAL_CONSOLE = "115200 ttyS0"

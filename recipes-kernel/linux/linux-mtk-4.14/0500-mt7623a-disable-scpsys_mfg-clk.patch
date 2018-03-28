@@ -1,0 +1,11 @@
+--- a/drivers/soc/mediatek/mtk-scpsys.c	2018-02-28 10:39:52.011445421 -0800
++++ b/drivers/soc/mediatek/mtk-scpsys.c	2018-02-28 14:13:02.331596653 -0800
+@@ -534,7 +541,7 @@ static const struct scp_domain_data scp_
+ 		.ctl_offs = SPM_MFG_PWR_CON,
+ 		.sram_pdn_bits = GENMASK(11, 8),
+ 		.sram_pdn_ack_bits = GENMASK(12, 12),
+-		.clk_id = {CLK_MFG},
++		.clk_id = {CLK_NONE},
+ 		.active_wakeup = true,
+ 	},
+ 	[MT2701_POWER_DOMAIN_VDEC] = {

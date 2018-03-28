@@ -26,7 +26,7 @@ SRCREV = "e4b87e5b1d026bd010e2ba3abbf89561e8320287"
 SRC_URI = " \
     git://github.com/u-boot/u-boot.git;protocol=https \
     file://0000-compile-with-gcc6.patch \
-    file://0001-add-mt7623-evb-board.patch \
+    file://0001-add-mt7623-boards.patch \
     file://0010-mtk-eth-driver.patch \
     file://0020-mtk-nand-support.patch \
     file://0030-mtk-nor-flash-support.patch \
@@ -34,6 +34,8 @@ SRC_URI = " \
     file://0050-mtk-misc-driver-support.patch \
     file://0098-compile-u-boot-fw-utils.patch \
     file://0099-backport-u-boot-fw-utils.patch \
+    file://${MACHINE}.h \
+    file://${MACHINE}-env.txt \
     "
 
 S = "${WORKDIR}/git"
@@ -49,5 +51,10 @@ python do_patch() {
     bb.build.exec_func('patch_do_patch', d)
 }
 
+do_compile_prepend () {
+    cp ${WORKDIR}/${MACHINE}.h ${S}/include/configs
+    cp ${WORKDIR}/${MACHINE}-env.txt ${S}
+}
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(mt7623-evb)"
+COMPATIBLE_MACHINE = "(mt7623-evb|mt7623-bpi-r2)"

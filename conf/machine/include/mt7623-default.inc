@@ -32,3 +32,6 @@ EXTRA_IMAGECMD_ext4 = "-b 1024 -j -O sparse_super,filetype,^resize_inode,dir_ind
 
 SOC_FAMILY = "mediatek:mt7623"
 require conf/machine/include/soc-family.inc
+
+# turn errors into warnings in cases where original recipe is missing
+BB_DANGLINGAPPENDS_WARNONLY = "1"

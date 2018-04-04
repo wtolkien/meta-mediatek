@@ -1,9 +1,8 @@
 # Mediatek MT7623 default BSP
 
-#include conf/machine/include/samsung-exynos.inc
-#include conf/machine/include/odroid-default-settings.inc
-
-# TODO: try adding hard float (hf)
+# TODO: try adding hard float (hf) - this currently makes u-boot choke and
+# the perl cross-compile config probably needs adjusting as well. Not a
+# priority since performance gains are likely minimal - routers don't use FP
 #DEFAULTTUNE ?= "cortexa7thf-neon-vfpv4"
 
 # Cortex A7 Thumb, Neon VFPv4

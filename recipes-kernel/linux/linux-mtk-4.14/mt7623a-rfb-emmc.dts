@@ -404,6 +404,10 @@
 				default-state = "off";
 			};
 		};
+        mt6323rtc: rtc {
+			compatible = "mediatek,mt6397-rtc";
+			status = "okay";
+		};
 	};
 };
 
@@ -446,4 +450,3 @@
 &u3phy2 {
 	status = "okay";
 };
-

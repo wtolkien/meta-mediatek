@@ -39,6 +39,7 @@ SRC_URI = " \
 	file://0064-dts.patch \
 	file://0100-add-mt6323-rtc-support.patch \
 	file://0101-add-mt6323-poweroff.patch \
+	file://0110-fix-mtk-spi-read.patch \
 	file://0400-iommu.patch \
 	file://0500-mt7623a-disable-scpsys_mfg-clk.patch \
 	"

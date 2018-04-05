@@ -1,0 +1,28 @@
+Index: linux-4.14.26/drivers/spi/spi-mt65xx.c
+===================================================================
+--- linux-4.14.26.orig/drivers/spi/spi-mt65xx.c
++++ linux-4.14.26/drivers/spi/spi-mt65xx.c
+@@ -382,6 +382,7 @@ static int mtk_spi_fifo_transfer(struct
+ 	int cnt, remainder;
+ 	u32 reg_val;
+ 	struct mtk_spi *mdata = spi_master_get_devdata(master);
++	void *xfer_buf = xfer->tx_buf ? xfer->tx_buf : xfer->rx_buf;
+ 
+ 	mdata->cur_transfer = xfer;
+ 	mdata->xfer_len = min(MTK_SPI_MAX_FIFO_SIZE, xfer->len);
+@@ -389,12 +390,13 @@ static int mtk_spi_fifo_transfer(struct
+ 	mtk_spi_setup_packet(master);
+ 
+ 	cnt = xfer->len / 4;
+-	iowrite32_rep(mdata->base + SPI_TX_DATA_REG, xfer->tx_buf, cnt);
++	iowrite32_rep(mdata->base + SPI_TX_DATA_REG, xfer_buf, cnt);
+ 
+ 	remainder = xfer->len % 4;
++
+ 	if (remainder > 0) {
+ 		reg_val = 0;
+-		memcpy(&reg_val, xfer->tx_buf + (cnt * 4), remainder);
++		memcpy(&reg_val, xfer_buf + (cnt * 4), remainder);
+ 		writel(reg_val, mdata->base + SPI_TX_DATA_REG);
+ 	}
+ 

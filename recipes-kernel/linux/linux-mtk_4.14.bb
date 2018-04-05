@@ -37,6 +37,8 @@ SRC_URI = " \
 	file://0062-mdio-atomic.patch \
 	file://0063-atomic-sleep.patch \
 	file://0064-dts.patch \
+	file://0100-add-mt6323-rtc-support.patch \
+	file://0101-add-mt6323-poweroff.patch \
 	file://0400-iommu.patch \
 	file://0500-mt7623a-disable-scpsys_mfg-clk.patch \
 	"

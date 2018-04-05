@@ -1,0 +1,414 @@
+diff -rupN b/Documentation/devicetree/bindings/mfd/mt6397.txt a/Documentation/devicetree/bindings/mfd/mt6397.txt
+--- b/Documentation/devicetree/bindings/mfd/mt6397.txt	2018-04-04 15:46:38.738533379 -0700
++++ a/Documentation/devicetree/bindings/mfd/mt6397.txt	2018-04-04 15:50:05.450531135 -0700
+@@ -21,8 +21,10 @@ compatible: "mediatek,mt6397" or "mediat
+ Optional subnodes:
+
+ - rtc
+-	Required properties:
++	Required properties: Should be one of follows
++		- compatible: "mediatek,mt6323-rtc"
+ 		- compatible: "mediatek,mt6397-rtc"
++	For details, see Documentation/devicetree/bindings/rtc/rtc-mt6397.txt
+ - regulators
+ 	Required properties:
+ 		- compatible: "mediatek,mt6397-regulator"
+diff -rupN b/Documentation/devicetree/bindings/rtc/rtc-mt6397.txt a/Documentation/devicetree/bindings/rtc/rtc-mt6397.txt
+--- b/Documentation/devicetree/bindings/rtc/rtc-mt6397.txt	1969-12-31 16:00:00.000000000 -0800
++++ a/Documentation/devicetree/bindings/rtc/rtc-mt6397.txt	2018-04-04 15:49:23.102531595 -0700
+@@ -0,0 +1,39 @@
++Device-Tree bindings for MediaTek PMIC based RTC
++
++MediaTek PMIC based RTC is an independent function of MediaTek PMIC which
++is working as a multi-function device (MFD). And the RTC can be configured and
++set up via PMIC wrapper bus. Which is also common resource shared among the
++other functions present on the PMIC.
++
++For MediaTek PMIC wrapper bus bindings, see:
++Documentation/devicetree/bindings/soc/mediatek/pwrap.txt
++
++Required parent node:
++- pmic
++  For MediaTek PMIC MFD bindings, see:
++  Documentation/devicetree/bindings/mfd/mt6397.txt
++
++Required properties:
++- compatible: Should be one of follows
++	"mediatek,mt6323-rtc": for MT6323 PMIC
++	"mediatek,mt6397-rtc": for MT6397 PMIC
++
++Optional child node:
++- power-off
++  For Power-Off Device for MediaTek PMIC RTC bindings, see:
++  Documentation/devicetree/bindings/power/reset/mt6397-rtc-poweroff.txt
++
++Example:
++
++	pmic {
++		compatible = "mediatek,mt6323";
++
++		...
++		rtc {
++			compatible = "mediatek,mt6323-rtc";
++
++			power-off {
++				compatible = "mediatek,mt6323-rtc-poweroff";
++			};
++		};
++};
+diff -rupN b/drivers/mfd/mt6397-core.c a/drivers/mfd/mt6397-core.c
+--- b/drivers/mfd/mt6397-core.c	2018-04-04 15:46:46.358533296 -0700
++++ a/drivers/mfd/mt6397-core.c	2018-04-04 15:51:48.610530016 -0700
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2014 MediaTek Inc.
++ * Copyright (c) 2014-2018 MediaTek Inc.
+  * Author: Flora Fu, MediaTek
+  *
+  * This program is free software; you can redistribute it and/or modify
+@@ -23,6 +23,9 @@
+ #include <linux/mfd/mt6397/registers.h>
+ #include <linux/mfd/mt6323/registers.h>
+
++#define MT6323_RTC_BASE		0x8000
++#define MT6323_RTC_SIZE		0x3e
++
+ #define MT6397_RTC_BASE		0xe000
+ #define MT6397_RTC_SIZE		0x3e
+
+@@ -30,6 +33,19 @@
+ #define MT6391_CID_CODE		0x91
+ #define MT6397_CID_CODE		0x97
+
++static const struct resource mt6323_rtc_resources[] = {
++	{
++		.start = MT6323_RTC_BASE,
++		.end   = MT6323_RTC_BASE + MT6323_RTC_SIZE,
++		.flags = IORESOURCE_MEM,
++	},
++	{
++		.start = MT6323_IRQ_STATUS_RTC,
++		.end   = MT6323_IRQ_STATUS_RTC,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
+ static const struct resource mt6397_rtc_resources[] = {
+ 	{
+ 		.start = MT6397_RTC_BASE,
+@@ -45,6 +61,11 @@ static const struct resource mt6397_rtc_
+
+ static const struct mfd_cell mt6323_devs[] = {
+ 	{
++		.name = "mt6323-rtc",
++		.num_resources = ARRAY_SIZE(mt6323_rtc_resources),
++		.resources = mt6323_rtc_resources,
++		.of_compatible = "mediatek,mt6323-rtc",
++	}, {
+ 		.name = "mt6323-regulator",
+ 		.of_compatible = "mediatek,mt6323-regulator"
+ 	}, {
+@@ -289,7 +310,7 @@ static int mt6397_probe(struct platform_
+
+ 		ret = devm_mfd_add_devices(&pdev->dev, -1, mt6323_devs,
+ 					   ARRAY_SIZE(mt6323_devs), NULL,
+-					   0, NULL);
++					   0, pmic->irq_domain);
+ 		break;
+
+ 	case MT6397_CID_CODE:
+@@ -304,7 +325,7 @@ static int mt6397_probe(struct platform_
+
+ 		ret = devm_mfd_add_devices(&pdev->dev, -1, mt6397_devs,
+ 					   ARRAY_SIZE(mt6397_devs), NULL,
+-					   0, NULL);
++					   0, pmic->irq_domain);
+ 		break;
+
+ 	default:
+diff -rupN b/drivers/rtc/rtc-mt6397.c a/drivers/rtc/rtc-mt6397.c
+--- b/drivers/rtc/rtc-mt6397.c	2018-04-04 15:46:47.946533279 -0700
++++ a/drivers/rtc/rtc-mt6397.c	2018-04-04 15:55:28.234527632 -0700
+@@ -1,80 +1,26 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+-* Copyright (c) 2014-2015 MediaTek Inc.
+-* Author: Tianping.Fang <tianping.fang@mediatek.com>
+-*
+-* This program is free software; you can redistribute it and/or modify
+-* it under the terms of the GNU General Public License version 2 as
+-* published by the Free Software Foundation.
+-*
+-* This program is distributed in the hope that it will be useful,
+-* but WITHOUT ANY WARRANTY; without even the implied warranty of
+-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-* GNU General Public License for more details.
+-*/
++ * MediaTek PMIC RTC driver
++ *
++ * Copyright (C) 2014-2018 MediaTek Inc.
++ *
++ * Author: Tianping.Fang <tianping.fang@mediatek.com>
++ *	   Sean Wang <sean.wang@mediatek.com>
++ */
+
+-#include <linux/delay.h>
+-#include <linux/init.h>
++#include <linux/err.h>
++#include <linux/interrupt.h>
++#include <linux/mfd/mt6397/core.h>
+ #include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/of_platform.h>
++#include <linux/platform_device.h>
+ #include <linux/regmap.h>
+ #include <linux/rtc.h>
+-#include <linux/irqdomain.h>
+-#include <linux/platform_device.h>
+-#include <linux/of_address.h>
+-#include <linux/of_irq.h>
+-#include <linux/io.h>
+-#include <linux/mfd/mt6397/core.h>
+-
+-#define RTC_BBPU		0x0000
+-#define RTC_BBPU_CBUSY		BIT(6)
+-
+-#define RTC_WRTGR		0x003c
+-
+-#define RTC_IRQ_STA		0x0002
+-#define RTC_IRQ_STA_AL		BIT(0)
+-#define RTC_IRQ_STA_LP		BIT(3)
+-
+-#define RTC_IRQ_EN		0x0004
+-#define RTC_IRQ_EN_AL		BIT(0)
+-#define RTC_IRQ_EN_ONESHOT	BIT(2)
+-#define RTC_IRQ_EN_LP		BIT(3)
+-#define RTC_IRQ_EN_ONESHOT_AL	(RTC_IRQ_EN_ONESHOT | RTC_IRQ_EN_AL)
+-
+-#define RTC_AL_MASK		0x0008
+-#define RTC_AL_MASK_DOW		BIT(4)
+-
+-#define RTC_TC_SEC		0x000a
+-/* Min, Hour, Dom... register offset to RTC_TC_SEC */
+-#define RTC_OFFSET_SEC		0
+-#define RTC_OFFSET_MIN		1
+-#define RTC_OFFSET_HOUR		2
+-#define RTC_OFFSET_DOM		3
+-#define RTC_OFFSET_DOW		4
+-#define RTC_OFFSET_MTH		5
+-#define RTC_OFFSET_YEAR		6
+-#define RTC_OFFSET_COUNT	7
+-
+-#define RTC_AL_SEC		0x0018
+-
+-#define RTC_PDN2		0x002e
+-#define RTC_PDN2_PWRON_ALARM	BIT(4)
+-
+-#define RTC_MIN_YEAR		1968
+-#define RTC_BASE_YEAR		1900
+-#define RTC_NUM_YEARS		128
+-#define RTC_MIN_YEAR_OFFSET	(RTC_MIN_YEAR - RTC_BASE_YEAR)
+-
+-struct mt6397_rtc {
+-	struct device		*dev;
+-	struct rtc_device	*rtc_dev;
+-	struct mutex		lock;
+-	struct regmap		*regmap;
+-	int			irq;
+-	u32			addr_base;
+-};
++#include <linux/rtc/mt6397.h>
+
+ static int mtk_rtc_write_trigger(struct mt6397_rtc *rtc)
+ {
+-	unsigned long timeout = jiffies + HZ;
+ 	int ret;
+ 	u32 data;
+
+@@ -82,19 +28,13 @@ static int mtk_rtc_write_trigger(struct
+ 	if (ret < 0)
+ 		return ret;
+
+-	while (1) {
+-		ret = regmap_read(rtc->regmap, rtc->addr_base + RTC_BBPU,
+-				  &data);
+-		if (ret < 0)
+-			break;
+-		if (!(data & RTC_BBPU_CBUSY))
+-			break;
+-		if (time_after(jiffies, timeout)) {
+-			ret = -ETIMEDOUT;
+-			break;
+-		}
+-		cpu_relax();
+-	}
++	ret = regmap_read_poll_timeout(rtc->regmap,
++				       rtc->addr_base + RTC_BBPU, data,
++				       !(data & RTC_BBPU_CBUSY),
++				       MTK_RTC_POLL_DELAY_US,
++				       MTK_RTC_POLL_TIMEOUT);
++	if (ret)
++		dev_err(rtc->dev, "failed to write WRTGE: %d\n", ret);
+
+ 	return ret;
+ }
+@@ -322,10 +262,9 @@ static int mtk_rtc_probe(struct platform
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	rtc->addr_base = res->start;
+
+-	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
+-	rtc->irq = irq_create_mapping(mt6397_chip->irq_domain, res->start);
+-	if (rtc->irq <= 0)
+-		return -EINVAL;
++	rtc->irq = platform_get_irq(pdev, 0);
++	if (rtc->irq < 0)
++		return rtc->irq;
+
+ 	rtc->regmap = mt6397_chip->regmap;
+ 	rtc->dev = &pdev->dev;
+@@ -333,44 +272,27 @@ static int mtk_rtc_probe(struct platform
+
+ 	platform_set_drvdata(pdev, rtc);
+
+-	ret = request_threaded_irq(rtc->irq, NULL,
+-				   mtk_rtc_irq_handler_thread,
+-				   IRQF_ONESHOT | IRQF_TRIGGER_HIGH,
+-				   "mt6397-rtc", rtc);
++	ret = devm_request_threaded_irq(&pdev->dev, rtc->irq, NULL,
++					mtk_rtc_irq_handler_thread,
++					IRQF_ONESHOT | IRQF_TRIGGER_HIGH,
++					"mt6397-rtc", rtc);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Failed to request alarm IRQ: %d: %d\n",
+ 			rtc->irq, ret);
+-		goto out_dispose_irq;
++		return ret;
+ 	}
+
+ 	device_init_wakeup(&pdev->dev, 1);
+
+-	rtc->rtc_dev = rtc_device_register("mt6397-rtc", &pdev->dev,
+-					   &mtk_rtc_ops, THIS_MODULE);
++	rtc->rtc_dev = devm_rtc_device_register(&pdev->dev, "mt6397-rtc",
++						&mtk_rtc_ops, THIS_MODULE);
+ 	if (IS_ERR(rtc->rtc_dev)) {
+ 		dev_err(&pdev->dev, "register rtc device failed\n");
+ 		ret = PTR_ERR(rtc->rtc_dev);
+-		goto out_free_irq;
++		return ret;
+ 	}
+
+-	return 0;
+-
+-out_free_irq:
+-	free_irq(rtc->irq, rtc->rtc_dev);
+-out_dispose_irq:
+-	irq_dispose_mapping(rtc->irq);
+-	return ret;
+-}
+-
+-static int mtk_rtc_remove(struct platform_device *pdev)
+-{
+-	struct mt6397_rtc *rtc = platform_get_drvdata(pdev);
+-
+-	rtc_device_unregister(rtc->rtc_dev);
+-	free_irq(rtc->irq, rtc->rtc_dev);
+-	irq_dispose_mapping(rtc->irq);
+-
+-	return 0;
++	return devm_of_platform_populate(&pdev->dev);
+ }
+
+ #ifdef CONFIG_PM_SLEEP
+@@ -399,6 +321,7 @@ static SIMPLE_DEV_PM_OPS(mt6397_pm_ops,
+ 			mt6397_rtc_resume);
+
+ static const struct of_device_id mt6397_rtc_of_match[] = {
++	{ .compatible = "mediatek,mt6323-rtc", },
+ 	{ .compatible = "mediatek,mt6397-rtc", },
+ 	{ }
+ };
+@@ -411,7 +334,6 @@ static struct platform_driver mtk_rtc_dr
+ 		.pm = &mt6397_pm_ops,
+ 	},
+ 	.probe	= mtk_rtc_probe,
+-	.remove = mtk_rtc_remove,
+ };
+
+ module_platform_driver(mtk_rtc_driver);
+diff -rupN b/include/linux/rtc/mt6397.h a/include/linux/rtc/mt6397.h
+--- b/include/linux/rtc/mt6397.h	1969-12-31 16:00:00.000000000 -0800
++++ a/include/linux/rtc/mt6397.h	2018-04-04 15:54:30.346528260 -0700
+@@ -0,0 +1,72 @@
++
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2014-2018 MediaTek Inc.
++ *
++ * Author: Tianping.Fang <tianping.fang@mediatek.com>
++ *	   Sean Wang <sean.wang@mediatek.com>
++ */
++
++#ifndef _LINUX_RTC_MT6397_H_
++#define _LINUX_RTC_MT6397_H_
++
++#include <linux/jiffies.h>
++#include <linux/mutex.h>
++#include <linux/regmap.h>
++#include <linux/rtc.h>
++
++#define RTC_BBPU		0x0000
++#define RTC_BBPU_CBUSY		BIT(6)
++
++#define RTC_WRTGR		0x003c
++
++#define RTC_IRQ_STA		0x0002
++#define RTC_IRQ_STA_AL		BIT(0)
++#define RTC_IRQ_STA_LP		BIT(3)
++
++#define RTC_IRQ_EN		0x0004
++#define RTC_IRQ_EN_AL		BIT(0)
++#define RTC_IRQ_EN_ONESHOT	BIT(2)
++#define RTC_IRQ_EN_LP		BIT(3)
++#define RTC_IRQ_EN_ONESHOT_AL	(RTC_IRQ_EN_ONESHOT | RTC_IRQ_EN_AL)
++
++#define RTC_AL_MASK		0x0008
++#define RTC_AL_MASK_DOW		BIT(4)
++
++#define RTC_TC_SEC		0x000a
++/* Min, Hour, Dom... register offset to RTC_TC_SEC */
++#define RTC_OFFSET_SEC		0
++#define RTC_OFFSET_MIN		1
++#define RTC_OFFSET_HOUR		2
++#define RTC_OFFSET_DOM		3
++#define RTC_OFFSET_DOW		4
++#define RTC_OFFSET_MTH		5
++#define RTC_OFFSET_YEAR		6
++#define RTC_OFFSET_COUNT	7
++
++#define RTC_AL_SEC		0x0018
++
++#define RTC_PDN2		0x002e
++#define RTC_PDN2_PWRON_ALARM	BIT(4)
++
++#define RTC_MIN_YEAR		1968
++#define RTC_BASE_YEAR		1900
++#define RTC_NUM_YEARS		128
++#define RTC_MIN_YEAR_OFFSET	(RTC_MIN_YEAR - RTC_BASE_YEAR)
++
++#define MTK_RTC_POLL_DELAY_US	10
++#define MTK_RTC_POLL_TIMEOUT	(jiffies_to_usecs(HZ))
++
++struct mt6397_rtc {
++	struct device		*dev;
++	struct rtc_device	*rtc_dev;
++
++	/* protect registers accessing */
++	struct mutex		lock;
++	struct regmap		*regmap;
++	int			irq;
++	u32			addr_base;
++};
++
++#endif /* _LINUX_RTC_MT6397_H_ */
++

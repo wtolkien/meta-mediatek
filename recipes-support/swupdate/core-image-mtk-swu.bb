@@ -7,12 +7,12 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 # Note: sw-description is mandatory
-SRC_URI_mt7623-bpi-r2 = " \
+SRC_URI_append_mt7623-bpi-r2 = " \
 	file://sw-description \
 	file://update.sh \
     "
 
-SRC_URI_mt7623-evb = " \
+SRC_URI_append_mt7623-evb = " \
 	file://sw-description \
 	file://update.sh \
     "

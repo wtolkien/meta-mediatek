@@ -44,11 +44,11 @@
  ****************************************************************************************************************/
 
 
-/* select one of the following (only eMMC has been tested recently) */
+/* select one of the following (only eMMC/SD has been tested recently) */
 #undef  ON_BOARD_NAND_FLASH_COMPONENT
 #undef  ON_BOARD_SPI_FLASH_COMPONENT
-#define ON_BOARD_EMMC_COMPONENT 1
-#undef  OFF_BOARD_SD_CARD_COMPONENT
+#undef ON_BOARD_EMMC_COMPONENT
+#define  OFF_BOARD_SD_CARD_COMPONENT 1
 
 #ifdef ON_BOARD_NAND_FLASH_COMPONENT
 #define CONFIG_MTK_MTD_NAND 1
@@ -285,7 +285,7 @@
 #define CONFIG_CMD_MMC
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_ENV_SIZE                     SZ_16K
-#define CONFIG_ENV_OFFSET                   0x3c000 		/* U-Boot environment address in Flash (NOT block #) */
+#define CONFIG_ENV_OFFSET                   0x4c000 		/* U-Boot environment address in Flash (NOT block #) */
 #define CONFIG_SYS_MMC_ENV_DEV              0
 
 
@@ -295,9 +295,10 @@
 #elif defined(OFF_BOARD_SD_CARD_COMPONENT)
 
 /* SD card is MMC device #1 */
-#define CONFIG_ENV_IS_IN_SD
-#define CONFIG_ENV_SIZE                     SZ_128K
-#define CONFIG_ENV_OFFSET                   0xD2800
+#define CONFIG_CMD_MMC
+#define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_ENV_SIZE                     SZ_16K
+#define CONFIG_ENV_OFFSET                   0x4c000
 #define CONFIG_SYS_MMC_ENV_DEV              1
 
 

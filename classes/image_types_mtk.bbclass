@@ -7,7 +7,7 @@ DEPENDS += "parted-native u-boot"
 # change suffix to 'bin', default is 'rootfs' which may be a bit misleading Since
 # our rootfs also contains the linux kernel and, in case of the SD image, bootloader
 # and preloader
-IMAGE_NAME_SUFFIX = "bin"
+IMAGE_NAME_SUFFIX = ".bin"
 
 inherit image_types
 
@@ -104,7 +104,7 @@ copy_emmc_preloader () {
 assemble_sd_image () {
     # Initialize a sparse SD image file that's just big enough to cover the
     # space before the first rootfs
-    dd if=/dev/zero of=${SD_FILE} bs=1 count=0 seek=`printf "%d" ${MTK_ROOTFS1_OFFSET}` conv=notrunc
+    dd if=/dev/zero of=${SD_FILE} bs=1 count=0 seek=`printf "%d" ${MTK_ROOTFS1_OFFSET}`
 
     # now fill that space, start with proprietary 2k header provided by MTK
     dd if=${MTK_IMAGE_FILEDIR}/sd-card-header.bin of=${SD_FILE} bs=512 count=4 conv=notrunc
@@ -113,11 +113,11 @@ assemble_sd_image () {
     # add preloader at address 0x800
     dd if=${MTK_IMAGE_FILEDIR}/preloader-${MACHINE}.bin of=${SD_FILE} bs=512 seek=4 conv=notrunc
     # add u-boot and u-boot environment
-    dd if=${DEPLOY_DIR_IMAGE}/u-boot-env-${MACHINE}-sd.bin of={SD_FILE} bs=1 seek=`printf "%d" ${EMMC_UBOOT_ENV_OFFSET}` conv=notrunc
-    dd if=${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}.bin-sd of={SD_FILE} bs=1 seek=`printf "%d" ${EMMC_UBOOT_OFFSET}` conv=notrunc
+    dd if=${DEPLOY_DIR_IMAGE}/u-boot-env-${MACHINE}-sd.bin of=${SD_FILE} bs=1 seek=`printf "%d" ${EMMC_UBOOT_ENV_OFFSET}` conv=notrunc
+    dd if=${DEPLOY_DIR_IMAGE}/u-boot-${MACHINE}.bin-sd of=${SD_FILE} bs=1 seek=`printf "%d" ${EMMC_UBOOT_OFFSET}` conv=notrunc
 
     # append the rootfs
-    cat ${IMGDEPLOYDIR}/${PN}-${MACHINE}.ext4 >> ${SD_FILE}
+    dd if=${IMGDEPLOYDIR}/${PN}-${MACHINE}.ext4 of=${SD_FILE} bs=64k oflag=append conv=notrunc
 }
 
 

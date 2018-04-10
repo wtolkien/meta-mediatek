@@ -54,18 +54,19 @@ FILES_${PN} = " \
 # 'mmcblk1' -> SD card
 pkg_postinst_${PN} () {
 	if [ x"$D" = "x" ]; then
-		# capability stuff has to be done on target
-        if [ -n "`cat ${sysconfdir}/fw_env.config | grep "/dev/null"`" ]; then
+        if [ -n "`cat ${sysconfdir}/fw_env.config | grep \"/dev/null\"`" ]; then
             for bootarg in `cat /proc/cmdline` ; do
                 if [ ${bootarg:0:5} = "root=" ]; then
-                    if [ ${bootarg:5:7} = "mmcblk0" ]; then
+                    if [ ${bootarg:10:7} = "mmcblk0" ]; then
                         sed -i 's|null|mmcblk0|' ${sysconfdir}/fw_env.config
                     fi
-                    if [ ${bootarg:5:7} = "mmcblk1" ]; then
+                    if [ ${bootarg:10:7} = "mmcblk1" ]; then
                         sed -i 's|null|mmcblk1|' ${sysconfdir}/fw_env.config
                     fi
                 fi
             done
         fi
-	fi
+	else
+        exit 1
+    fi
 }

@@ -28,8 +28,14 @@ IMAGE_INSTALL_append = " kernel kernel-modules"
 # extra options for embedded to minimize Flash wear
 EXTRA_IMAGECMD_ext4 = "-b 1024 -j -O sparse_super,filetype,^resize_inode,dir_index,^ext_attr,^64bit,^dir_nlink,extent,extra_isize,flex_bg,^huge_file,large_file,^meta_bg,^quota -I 128 -i 4096"
 
-SOC_FAMILY = "mediatek:mt7623"
+SOC_FAMILY = "mt7623"
 require conf/machine/include/soc-family.inc
 
 # turn errors into warnings in cases where original recipe is missing
 BB_DANGLINGAPPENDS_WARNONLY = "1"
+
+# all MT7623 platforms so far use either eMMC or SD cards, so the persistent data
+# partition shall be the third partition of either one of these.
+# This partition will be created during first boot if it doesn't already exist.
+# Check the 'initscripts' package extension that's part of this layer
+PERSISTENT_DATA_PART = "3"

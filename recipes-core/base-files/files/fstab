@@ -5,4 +5,4 @@ tmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,stri
 tmpfs                /var/volatile        tmpfs      defaults              0  0
 
 # persistent data partition
-#placeholder    /var/persistent          auto       noatime               0  2
+/dev/mmcblk0p3    /var/persistent          ext4       noatime,x-systemd.makefs               0  2

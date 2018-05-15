@@ -17,7 +17,7 @@ kernel_file=/boot/fitImage
 mmc_device=0
 boot_part=1
 loadaddr=0x84000000
-f_set_bootargs=setenv bootargs console=ttyS0,115200n1 root=/dev/mmcblk${mmc_device}p${boot_part} rw rootfstype=ext4 rootwait coherent_pool=4M ${usrargs}
+f_set_bootargs=setenv bootargs console=ttyS0,115200n1 root=/dev/mmcblk${mmc_device}p${boot_part} rw rootfstype=ext4 rootwait coherent_pool=4M audit=0 ${usrargs}
 f_read_kernel=ext4load mmc ${mmc_device}:${boot_part} ${loadaddr} ${kernel_file}
 f_setup_pri=echo Booting primary firmware image...; setenv boot_part 1
 f_setup_sec=echo Booting secondary firmare image...; setenv boot_part 2

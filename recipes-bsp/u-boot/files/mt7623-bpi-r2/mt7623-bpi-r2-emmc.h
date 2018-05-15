@@ -358,7 +358,7 @@
  *                                       UBoot Command
  **********************************************************************************************/
 /* Shell */
-#define CONFIG_SYS_MAXARGS		            8
+#define CONFIG_SYS_MAXARGS		            16
 #define CONFIG_SYS_PROMPT		            "mt7623-uboot > "
 #define CONFIG_COMMAND_HISTORY
 #define CONFIG_SYS_BOOT_GET_CMDLINE

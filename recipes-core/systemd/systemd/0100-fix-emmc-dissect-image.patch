@@ -1,0 +1,76 @@
+--- a/src/shared/dissect-image.c	2018-04-24 15:50:17.076576234 -0700
++++ b/src/shared/dissect-image.c	2018-04-24 15:52:18.765831664 -0700
+@@ -108,6 +108,27 @@ not_found:
+ #endif
+ }
+
++/* Detect RPMB and Boot partitions, which are not listed by blkid.
++ * See https://github.com/systemd/systemd/issues/5806. */
++static bool device_is_mmc_special_partition(struct udev_device *d) {
++        const char *sysname;
++
++		sysname = udev_device_get_sysname(d);
++        return (sysname && startswith(sysname, "mmcblk") &&
++                (endswith(sysname, "rpmb") || endswith(sysname, "boot0") || endswith(sysname, "boot1")));
++}
++
++static bool device_is_block(struct udev_device *d) {
++        const char *ss;
++
++        ss = udev_device_get_subsystem(d);
++        if (!ss)
++                return false;
++
++        return streq(ss, "block");
++}
++
++
+ int dissect_image(int fd, const void *root_hash, size_t root_hash_size, DissectImageFlags flags, DissectedImage **ret) {
+
+ #if HAVE_BLKID
+@@ -277,8 +298,25 @@ int dissect_image(int fd, const void *ro
+                 /* Count the partitions enumerated by the kernel */
+                 n = 0;
+                 first = udev_enumerate_get_list_entry(e);
+-                udev_list_entry_foreach(item, first)
+-                        n++;
++                udev_list_entry_foreach(item, first) {
++                        _cleanup_udev_device_unref_ struct udev_device *q;
++						dev_t qn;
++
++                        q = udev_device_new_from_syspath(udev, udev_list_entry_get_name(item));
++                        if (!q)
++                                return -errno;
++
++						qn = udev_device_get_devnum(q);
++                        if (major(qn) == 0)
++                                continue;
++
++                        if (!device_is_block(q))
++                                continue;
++
++                        if (device_is_mmc_special_partition(q))
++                                continue;
++                         n++;
++                }
+
+                 /* Count the partitions enumerated by blkid */
+                 z = blkid_partlist_numof_partitions(pl);
+@@ -352,13 +390,12 @@ int dissect_image(int fd, const void *ro
+                 if (st.st_rdev == qn)
+                         continue;
+
+-                /* Filter out weird MMC RPMB partitions, which cannot reasonably be read, see
+-                 * https://github.com/systemd/systemd/issues/5806 */
+-                sysname = udev_device_get_sysname(q);
+-                if (sysname && startswith(sysname, "mmcblk") &&
+-                        (endswith(sysname, "rpmb") || endswith(sysname, "boot0" ) || endswith(sysname, "boot1")))
++                if (!device_is_block(q))
+                         continue;
+
++                if (device_is_mmc_special_partition(q))
++						continue;
++
+                 node = udev_device_get_devnode(q);
+                 if (!node)
+                         continue;

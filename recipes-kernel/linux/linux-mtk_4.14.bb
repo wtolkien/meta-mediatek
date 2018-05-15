@@ -54,6 +54,10 @@ SRC_URI_append_mt7623-bpi-r2 = " \
 	file://defconfig-fragement-mt7623-bpi-r2.cfg \
 	"
 
+SRC_URI_append_mt7623-evb = " \
+	file://defconfig-fragement-mt7623-evb.cfg \
+	"
+
 # copy our own devicetree files to kernel source directory
 do_configure_prepend () {
 	cp ${B}/../*.dts ${S}/arch/arm/boot/dts

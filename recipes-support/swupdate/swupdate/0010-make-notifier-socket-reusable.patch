@@ -1,6 +1,6 @@
---- a/core/notifier.c	2018-02-07 17:12:54.106020824 -0800
-+++ b/core/notifier.c	2018-02-07 17:04:25.830026341 -0800
-@@ -226,6 +226,7 @@ static void *notifier_thread (void __att
+--- a/core/notifier.c	2018-04-24 09:54:47.982908811 -0700
++++ b/core/notifier.c	2018-04-24 09:55:36.415430532 -0700
+@@ -227,6 +227,7 @@ static void *notifier_thread (void __att
  {
  	int serverfd;
  	int len;
@@ -8,11 +8,10 @@
  	struct notify_ipc_msg msg;
 
  	/* Initialize and bind to UDS */
-@@ -234,6 +235,14 @@ static void *notifier_thread (void __att
- 		TRACE("Error creating notifier daemon");
+@@ -236,6 +237,13 @@ static void *notifier_thread (void __att
  		exit(2);
  	}
-+
+
 +	if ((setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR,
 +					 &sock_optval, sizeof(sock_optval))) < 0) {
 +		TRACE("Error setting socket options: %s", strerror(errno));
@@ -20,15 +19,6 @@
 +		exit(2);
 +	}
 +
- 	memset(&notify_server, 0, sizeof(notify_server));
- 	notify_server.sun_family = AF_UNIX;
- 	strcpy(notify_server.sun_path, "#NotifyServer");
-@@ -245,8 +254,8 @@ static void *notifier_thread (void __att
-
  	if (bind(serverfd, (const struct sockaddr *) &notify_server,
  			sizeof(struct sockaddr_un)) < 0) {
-+		TRACE("Error binding to notifier socket: %s", strerror(errno));
- 		close(serverfd);
--		TRACE("Error bind notifier socket");
- 		exit(2);
- 	}
+ 		fprintf(stderr, "Error binding notifier socket: %s, exiting.\n", strerror(errno));

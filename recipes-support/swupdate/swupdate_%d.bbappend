@@ -23,4 +23,8 @@ do_install_append () {
 	install -m 644 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}/
 	install -d ${D}${sysconfdir}/default/
 	install -m 644 ${WORKDIR}/swupdate.default ${D}${sysconfdir}/default/swupdate
+	# setting HW rev to 1.0, individual board scripts can override this
+	# if required. Needs to match "hardware-compatibility" in swupdate's
+	# sw-description file
+	echo "${MACHINE} 1.0" > ${D}${sysconfdir}/hwrevision
 }
